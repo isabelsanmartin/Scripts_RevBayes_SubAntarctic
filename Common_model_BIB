@@ -33,7 +33,6 @@ for ( i in 1:D.size() )
     Q_M[i] := fnGTR( r_M[i], pi_M[i] )
 
     # Define clock rate
-    
     clockRate_M[i] ~ dnExponential( 3000.0 )   # We observe in BEAST TRACER that clockrate parameter for strict clock was always around 10E-4 with intervals around 10E-3.
 
    # Set tree prior parameters
@@ -41,13 +40,9 @@ for ( i in 1:D.size() )
     # Set bd model priors
  
     # Diversification prior
-    # The mean of the diversification prior corresponds to an expectation based on data from BEAST analysis of Acaena using a Yule model (Angela)
+    # The mean of the diversification prior corresponds to an expectation based on data from BEAST analysis of Acaena using a BD model
     # where BirthDeath Mean = 0.025, 95%HPD (0.006-0.045), Value range (0.001,0.088)
-    # rgamma(1000, shape=0.2, rate=1)->x
-    # summary(x)
-    #Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-    #0.000000 0.000576 0.015675 0.209272 0.183668 3.596570 
-    
+        
     diversification[i] ~ dnGamma(0.2, 1.0)
     turnover[i] ~ dnUniform(0.000001,0.999999)
 
@@ -55,16 +50,11 @@ for ( i in 1:D.size() )
     lambda[i] := diversification[i] / abs(1.0 - turnover[i])
     mu[i]     := turnover[i] * lambda[i]
 
-    # # Set the root age. Since most groups are post-Late Miocene, we use an exponential very broad, with minimum 0 Ma and "maximum" (13.06) following ACAENA  new dating with crown 7.00 Ma and 95% CI 12.49-3.78 , and the mean=1.51, median=1.03
-    ## > x <- rexp(1000, rate= 0.6)
-    #summary(x)
-    # Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
-    ##0.000282  0.444347  1.053289  1.580037  2.139167 13.058377 
-    
-   rootAge[i] ~ dnExponential( 0.60)
+    ## Set the root age. Since most groups are post-Late Miocene, we use an exponential very broad, with minimum 0 Ma and "maximum" (13.06) following Acaena  new dating with crown 8.16 Ma.
+    # where rexp (0.60), Mean = 1.58; 95%HPD= 0.44-2.14; Min = 0.0003; Max= 13.0583
+    rootAge[i] ~ dnExponential( 0.60)
    
    # We define the complete tree model
-
     tau[i] ~ dnBirthDeath(  lambda = lambda[i],
                             mu = mu[i],
                             rootAge = rootAge[i],
@@ -73,14 +63,10 @@ for ( i in 1:D.size() )
                             condition = "time",
                             taxa = D[i].taxa()
                         )
-
     alpha_M[i] ~ dnExponential(2.0)
-
     probs <- v( 0.125, 0.375, 0.625, 0.875 )
-
     for ( j in 1:4 )
         siteRates_M[i][j] := qgamma( probs[j], alpha_M[i], alpha_M[i] )
-
     seq_M[i] ~ dnPhyloCTMC( tree        = tau[i],
                             Q           = Q_M[i],
                             branchRates = clockRate_M[i],
@@ -88,9 +74,7 @@ for ( i in 1:D.size() )
                             nSites      = D[i].nchar(),
                             type        = "DNA"
                           )
-
     seq_M[i].clamp( D[i] )
-
 
 # add moves
     moves[ mvi++ ] = mvScale(clockRate_M[i],lambda=1,tune=true,weight=1)
@@ -111,12 +95,10 @@ for ( i in 1:D.size() )
 # We assume the biogeographic data are contained in the vector B_P,
 # and that the molecular models are contained in vectors of model
 # parameters where the vector tau_P is the vector of trees. We
-# assume that it is a time tree with branch lengths measured in
-# Myr.
+# assume that it is a time tree with branch lengths measured in Myr. 
 
 # We assume following state codes (0-offset in Nexus file, 1-offset here)
-# Coding: 0 = Mainland, 1 = gondwanian fragments, 2 = oceanic islands]
-
+# Coding: 0 = Mainland, 1 = Gondwanan Fragments, 2 = Eastern Austral Archipelagos]
 
 # Define the island carrying capacities and biotic exchange intensities
 pi_bio ~ dnDirichlet( v(1,1,1,1) )
@@ -129,20 +111,16 @@ Q_bio := fnGTR( r_bio, pi_bio )
 # Migration rate is defined in units of time; prior is derived
 # assuming an expected rate of 1.0 island switches/Myr. We want
 # a fairly vague prior because the uncertainty is considerable.
-# Here we use a gamma(0.5,1.5). It has 50 % credible
-# set (0.036,0.427)
-##  Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-## 0.000001 0.036267 0.165696 0.349339 0.427191 4.266095 
+# Here we use a gamma(0.5,1.5). It has 50 % credible set (0.036,0.427)
 
 mvi = 1
 mni = 1
 
 for ( i in 1:B.size() ) {
-
 migrationRates[i] ~ dnGamma( 0.5, 1.5 )
 
-    # Biogeography model, assuming that tau is in time units
-    bio[i] ~ dnPhyloCTMC(   tree            = tau[i],
+# Biogeography model, assuming that tau is in time units
+bio[i] ~ dnPhyloCTMC(   tree            = tau[i],
                             Q               = Q_bio,
                             rootFrequencies = pi_bio,
                             branchRates     = migrationRates[i],
@@ -150,7 +128,7 @@ migrationRates[i] ~ dnGamma( 0.5, 1.5 )
                             type            = "Standard"
                         )
 
-    bio[i].clamp( B[i] )
+bio[i].clamp( B[i] )
 
 # Make the model
 mymodel = model( bio[i] )
@@ -167,15 +145,11 @@ moves[mvi++ ] = mvScale(migrationRates[i],lambda=1,tune=true,weight=1)
 # Set up tree, model and screen monitors
 runName <- "Common_biogeo_model"
 
-
-
 # Screen and model monitors
-
 monitors[mni++] = mnModel(    
                                 filename = runName + ".csv",
                                 printgen = 10
                            )
-
 monitors[mni++] = mnScreen(   
                                 printgen = 10,
                                 pi_bio,
@@ -184,25 +158,15 @@ monitors[mni++] = mnScreen(
                                 posterior = true,
                                 likelihood = true,
                                 prior = true
-                            )
-                            
+                            )                       
 # Tree monitors
-
-    #fileName <- runName + ".tau" + ".tre"
-
+#fileName <- runName + ".tau" + ".tre"
 monitors = mnExtNewick(  tau[i],
                                 posterior = false,
                                 likelihood = false,
                                 prior = false,
                                 filename = runName,
                                 printgen = 10
-                             )
-                             
+                             )                        
 mymcmc = mcmc( mymodel, monitors, moves )
 mymcmc.run( generations=100000 )
-
-
-
-
-
-
