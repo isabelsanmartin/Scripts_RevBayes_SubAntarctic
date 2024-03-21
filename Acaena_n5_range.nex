@@ -1,0 +1,39 @@
+
+#NEXUS
+
+[Dataset:Biogeographical: Model 1: 4 island groups, 1 Outside "Mainland"] 
+[Coding: 0 = Mainland, 1 = Falkland, 2 = South Georgia, 3 = Southern biogeographic province, 4 = islas neozelandesas]
+
+BEGIN DATA;
+	DIMENSIONS  NTAX=26 NCHAR=1;
+Format datatype=Standard symbols="0 1 2 3 4" missing=? gap=-; 
+MATRIX
+
+AcChileMcaveL01				0  
+AcGeorgiaBirdB02			2     
+AcGeorgiaBirdJ01	      	2
+AcCrozetBAFaureO01	     	3
+AcCrozetMalpL04				3
+AcFalkIslandEfalkM01	   	1 
+AcFalkIslandMotleyT05	   	1
+AcFalkIslandPebbleB04   	1
+AcFalkIslandSaund01     	1
+AcHeardDovers01	         	3
+AcHeardPaddick04	       	3 
+AcKerguelenPointe102	   	3 
+AcKerguelenBaie305	        3
+AcMacqAcanea1101	       	4 
+AcMacqAcanea2203	       	4 
+AcMarionVandeBoo02	      	3
+AcMarionVandeBoo03      	3
+AcPatagCholila05			0        
+AcPrinceEdPlatkop03	 		3    
+AcPrinceEdslopePlat7706	 	3
+AcGeorgiaCarlita12	      	2
+AcGeorgiaCarlita21      	2
+AcGeorgiaMoltke22       	2
+AcGeorgiaSchlieper12    	2
+AcTierraUshuaia02       	0
+AcGeorgiaCooper37			2
+;
+end;

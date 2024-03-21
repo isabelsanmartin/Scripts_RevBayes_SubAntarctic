@@ -1,0 +1,44 @@
+
+#NEXUS
+
+[Dataset:Biogeographical: Model 1: 3 island groups, 1 Outside "Mainland"] 
+[Coding: 0 = Mainland, 1 = Falkland, 2 = Southern biogeographic province, 3 = macquaire]
+
+BEGIN DATA;
+	DIMENSIONS  NTAX=31 NCHAR=1;
+Format datatype=Standard symbols="0 1 2 3" missing=? gap=- symbols="0123";
+MATRIX
+					[MFGSI]
+AsMarionOCB829		2
+AsPrinceEPEH1745	2
+AsPrinceEPEJ1709	2
+AsPrinceEPEK1739	2
+AsPrinceEPEI1693	2
+AsStonyR2145		2
+AsSwartkop2833		2
+AsTafel3782			2
+AsFalkWHOW1679		1
+AsFalkEUSB1677		1
+AsFalkEUSB1662		1
+AsTierraBAH1652		0	
+AsTierraLAG1644		0
+AsTierraLY11656		0
+AsTierraLY21658		0
+AsCrozetCRO1590		2
+AsCrozetPER1566		2
+AsCrozetPOI1623		2
+AsCrozetMAL1636		2
+AsHeardSKO1923		2
+AsHeardDOM1880		2
+AsHeardFAR1841		2
+AsHeardPDK1896		2
+AsKergFUM448		2
+AsKergPJA9			2
+AsKergPR11410		2
+AsKergGOU42			2
+AsMacqAM11757		3
+AsMacqAM41831		3
+AsMacqAM21797		3
+AsMacqAM51835		3
+;
+end;
