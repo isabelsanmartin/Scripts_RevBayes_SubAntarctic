@@ -1,0 +1,29 @@
+#NEXUS
+
+[Dataset:Biogeographical: Model 1: 4 island groups, 1 Outside "Mainland"] 
+[Coding: 1 = Marion-Prince Edward, 2 = Crozet, 3 = Kerguelen, 4 = Heard]
+
+BEGIN DATA;
+	DIMENSIONS  NTAX=17 NCHAR=1;
+	FORMAT SYMBOLS= "0 1 2 3" MISSING=? GAP=-  INTERLEAVE=yes;
+MATRIX
+
+	Pantiscorbutica12	0
+	Pantiscorbutica10	0
+	Pantiscorbutica11	0
+	Pantiscorbutica13	0
+	Pantiscorbutica9	0
+	Pantiscorbutica8	0
+	Pantiscorbutica19	0
+	Pantiscorbutica20	0
+	Pantiscorbutica15	0
+	Pantiscorbutica14	0
+	Pantiscorbutica17	0
+	Pantiscorbutica2	1
+	Pantiscorbutica1	1
+	Pantiscorbutica3	3
+	Pantiscorbutica5	2
+	Pantiscorbutica6	2
+	Pantiscorbutica4	3
+;
+end;
