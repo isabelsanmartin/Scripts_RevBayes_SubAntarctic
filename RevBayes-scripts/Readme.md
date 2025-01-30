@@ -1,10 +1,4 @@
-"Tracing the biogeographic history of the world’s most isolated insular floras". 2025. Aguado-Lara, Ángela; 
-Sanmartin, Isabel; Le Roux, Johannes; García-Verdugo, Carlos; Molino, Sonia; Convey, Peter; van Vuuren, Bettine Jansen; 
-Mairal Pisa, Mario. https://doi.org/10.1111/jse.13170
+Two types of analyses can be found in this folder:
 
-To repeat the analyses from the article, these steps have to be followed:
-
-1) Download the nexus file in the data folder
-2) Run Molecular Model
-3) Run Biogeographic Model
-4) Run 
+1) Common BIB model where all the species are considered. Here, three types of parameters can be inferred: carrying capacity, species-specific overall migration rate, and dispersal rate.
+2) Individual BIB model where three target species are considered. Here, an ancestral reconstruction can be modelled.
