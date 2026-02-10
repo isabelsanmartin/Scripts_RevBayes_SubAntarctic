@@ -1,0 +1,134 @@
+#################################################
+####  ACAENA ANALYSES ###########################
+#################################################
+
+## Read the biogeographic Nexus matrix with the area codification
+
+setwd(".../")
+
+dist <- readDiscreteCharacterData("../Data/Distribution_files/Acaena_n5_range.nex")
+
+##### We are going to fix the phylogeny as provided by the BEAST time tree.
+
+tree <- readTrees("./Data/Tree_files/Acaena_2M.tre")[1]
+
+# We also record some basic information on number of taxa and number of branches.
+
+taxa = tree.taxa()
+n_taxa = taxa.size()
+n_branches = 2 * n_taxa - 2
+
+mvi = 1
+mni = 1
+
+
+
+#########################################################################################
+# BIOGEOGRAPHIC MODEL
+#########################################################################################
+
+# We assume the following state codes (0-offset in Nexus file, 1-offset here)
+# We have five states or discrete areas for Acaena magallenica: South America, Falkland, South Georgia, SIOBP and Macquarie
+#  0 (state 1) South America
+#  1 (state 2) Falkland
+#  2 (state 3) South Georgia
+#  3 (state 4) SIOBP
+#  4 (state 5) Macquarie
+
+# Define priors for elements of the Q[i] biogeographic CTMC process as in the multiclade BIB: the Q_B biographic rate matrix. 
+# There are five biogeographic areas or states; therefore, there are five stationary frequencies or carrying capacities.
+# They are assigned here an uninformative Dirichlet prior, with concentration parameter [1.0]
+# In a time-reversible GTR model for five states, there are 10 exchangeability rates: these are the dispersal rates between the five biogeographic areas, assuming equal rates in the two directions
+# We assign a Dirichlet prior with concentration parameter [1.0] to the vector of transition rates. 
+
+# Define the priors for the island carrying capacities and biotic exchange intensities.
+ 
+pi_bio ~ dnDirichlet( v(1,1,1,1,1) )
+r_bio  ~ dnDirichlet( v(1,1,1,1,1,1,1,1,1,1) )
+
+# add moves
+
+moves[ mvi++ ] = mvSimplexElementScale(pi_bio, alpha=10.0, tune=true, weight=4.0)
+moves[ mvi++ ] = mvSimplexElementScale(r_bio, alpha=10.0, tune=true, weight=6.0)
+
+
+# Define the biogeographic rate matrix
+Q_bio := fnGTR( r_bio, pi_bio )
+
+# Migration rate is defined in units of time; prior is derived
+# assuming an expected rate of 1.0 island switches/Myr. We want
+# a fairly vague prior because the uncertainty is considerable.
+# Here we use a gamma(1,1)=exp(1) prior. It has 50 % credible
+# set (0.29,1.39) and 95 % set (0.025,3.69).
+
+migrationRates ~ dnGamma( 1.0, 1.0 )
+
+# add moves
+
+moves[ mvi++ ] = mvScale(migrationRates,lambda=1,tune=true,weight=1)
+
+    # Biogeography model, assuming that tau is in time units
+    bio ~ dnPhyloCTMC(   tree            = tree,
+                            Q               = Q_bio,
+                            rootFrequencies = pi_bio,
+                            branchRates     = migrationRates,
+                            nSites          = 1,
+                            type            = "Standard"
+                        )
+
+    bio.clamp( dist )
+
+# Make the model
+mymodel = model( bio )
+
+# Set up tree, model and screen monitors
+runName <- "../Output_BIB_individual/Acanea_biogeo_model"
+# Screen and model monitors
+
+# The first monitors refer to the parameters in the model (written to file (all parameters) and shown in the screen (some parameters))
+
+monitors[mni++] = mnModel(    
+                                filename = runName + "../Output_BIB_individual/Acanea_biogeo_model.log",
+                                printgen = 10
+                           )
+
+monitors[mni++] = mnScreen(   
+                                printgen = 10,
+                                pi_bio,
+                                r_bio,
+                                migrationRates,
+                                posterior = true,
+                                likelihood = true,
+                                prior = true
+                            )
+                           
+# Next, we monitor the tree file to record the ancestral states (marginal probabilities, after accounting uncertainty in phylogenetic and ASR inference)
+# and next we used stochastic mapping to record the changes along branches (the frequencies of the realized dispersal process to obtain marginal probabilities)
+# We can choose to either get only the tree (topology and branch lengths) or the complete reconstruction.
+# These will be written in a tree file.
+
+# Tree monitors
+    
+
+monitors[mni++] = mnExtNewick(  filename = "../Output_BIB_individual/Acanea_biogeo_model.tree.tre",
+                                tree,
+                                posterior = false,
+                                likelihood = false,
+                                prior = false,
+                                printgen = 10
+                             )
+                             
+                             
+monitors[mni++] = mnJointConditionalAncestralState(tree=tree,
+                                                  ctmc=bio,
+                                                  type="Standard",
+                                                  withTips=true,
+                                                  withStartStates=true,
+                                                  filename="../Output_BIB_individual/Acanea_biogeo_model.states.log",
+                                                  printgen=10)
+
+monitors[mni++]= mnStochasticCharacterMap(ctmc=bio,
+                                          filename="../Output_BIB_individual/Acanea_biogeo_model.stoch.log",
+                                          printgen=10)
+mymcmc = mcmc( mymodel, monitors, moves )
+mymcmc.run( generations=100000 )
