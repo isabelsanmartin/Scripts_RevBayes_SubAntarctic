@@ -2,14 +2,16 @@
 ## MOLECULAR MODEL ##
 #####################
 
+setwd(".../")
+
 # This file processes all datasets jointly. We assume each group has its own molecular model, but shares biogeographic model.
-filenames <- [  "Acaena.nex",
-                "Azorella.nex",
-                "Colobanthus.nex",
-                "Pringlea2.nex",
-                "Polystichum.nex",
-                "Notogrammitis.nex",
-                "Austroblechnum.nex"]
+filenames <- [  ".../Data/nexus_files/Acaena.nex",
+                ".../Data/nexus_files/Azorella.nex",
+                ".../Data/nexus_files/Colobanthus.nex",
+                ".../Data/nexus_files/Pringlea2.nex",
+                ".../Data/nexus_files/Polystichum.nex",
+                ".../Data/nexus_files/Notogrammitis.nex",
+                ".../Data/nexus_files/Austroblechnum.nex"]
 
 
 for ( i in 1:filenames.size() )
@@ -142,12 +144,10 @@ moves[mvi++ ] = mvScale(migrationRates[i],lambda=1,tune=true,weight=1)
 
 }
 
-# Set up tree, model and screen monitors
-runName <- "Common_biogeo_model"
-
 # Screen and model monitors
+
 monitors[mni++] = mnModel(    
-                                filename = runName + ".csv",
+                                filename = ".../Ouput_BIB/Common_model.csv",
                                 printgen = 10
                            )
 monitors[mni++] = mnScreen(   
@@ -165,7 +165,7 @@ monitors = mnExtNewick(  tau[i],
                                 posterior = false,
                                 likelihood = false,
                                 prior = false,
-                                filename = runName,
+                                filename = ".../Ouput_BIB/Common_model.tre",
                                 printgen = 10
                              )                        
 mymcmc = mcmc( mymodel, monitors, moves )
